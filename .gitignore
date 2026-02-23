@@ -11,10 +11,11 @@ venv/
 env/
 .env
 
-# Modèles entraînés (fichiers lourds)
-results/models/*.pkl
-results/models/*.pt
-results/models/*.pth
+# Modèles entraînés — inclus dans le repo pour la livraison
+# (décommenter les lignes ci-dessous pour les exclure si trop lourds)
+# results/models/*.pkl
+# results/models/*.pt
+# results/models/*.pth
 
 # Jupyter
 .ipynb_checkpoints/

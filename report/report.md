@@ -470,5 +470,3 @@ Le **DQN** serait l'approche de choix pour une extension du problème (espaces d
 
 ---
 
-*Rapport généré dans le cadre du projet T-AIA-902 — Epitech*
-*Compléter les cellules `[à compléter]` après exécution de `python src/benchmark.py`*

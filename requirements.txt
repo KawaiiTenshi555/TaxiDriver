@@ -1,0 +1,18 @@
+# Environnement RL
+gymnasium[toy-text]
+
+# Calcul numérique
+numpy
+
+# Deep Learning (DQN)
+torch
+
+# Visualisation
+matplotlib
+seaborn
+
+# Tableaux de résultats
+pandas
+
+# Barre de progression
+tqdm

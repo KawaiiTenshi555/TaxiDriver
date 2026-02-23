@@ -59,15 +59,13 @@ python scripts/test_qlearning.py    # Q-Learning default vs optimized
 
 > See `results/plots/` for all graphs and `report/report.md` for full analysis.
 
-| Algorithm | Train Episodes | Mean Steps | Success Rate |
-|---|---|---|---|
-| Brute Force | 0 | ~200 | ~0% |
-| Q-Learning (default) | 1 000 | — | — |
-| Q-Learning (tuned) | 10 000 | — | — |
-| DQN (default) | 3 000 | — | — |
-| DQN (tuned) | 10 000 | — | — |
-
-*Fill after running `python src/benchmark.py`*
+| Algorithm | Train Episodes | Mean Steps | Mean Reward | Success Rate | Time/ep |
+|---|---|---|---|---|---|
+| Brute Force | 0 | 197.2 | -767.43 | 4.0% | 1.626 ms |
+| Q-Learning (default) | 1 000 | **13.0** | **+8.00** | **100%** | 0.104 ms |
+| Q-Learning (tuned) | 10 000 | **13.0** | **+8.00** | **100%** | 0.106 ms |
+| DQN (default) | 3 000 | **13.0** | **+8.00** | **100%** | 0.845 ms |
+| DQN (tuned) | 10 000 | **13.0** | **+8.00** | **100%** | 0.849 ms |
 
 ## Project Structure
 

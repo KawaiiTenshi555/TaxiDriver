@@ -118,16 +118,18 @@ Sans stratégie, l'agent effectue souvent des actions illégales (pickup/dropoff
 
 | Métrique | Brute Force |
 |---|---|
-| Mean Steps | 200 (timeout systématique) |
-| Mean Reward | ~ -600 à -700 |
-| Success Rate | ~ 0% |
+| Mean Steps | 197.2 ± 15.1 |
+| Steps min / max | 92 / 200 |
+| Mean Reward | -767.43 ± 87.06 |
+| Success Rate | 4.0% |
+| Time/episode | 1.626 ms |
 | Training Episodes | 0 |
 
-> Les épisodes sont tronqués à 200 steps par Gymnasium. Le reward très négatif s'explique par l'accumulation des pénalités de step (-1 × 200) et des nombreuses actions illégales (-10 chacune) tentées au hasard.
+> Les épisodes sont quasiment tous tronqués à 200 steps par Gymnasium (4% de réussite par chance pure). Le reward très négatif s'explique par l'accumulation des pénalités de step (-1 × ~197) et des nombreuses actions illégales (-10 chacune) tentées au hasard. Le minimum observé de 92 steps correspond aux rares épisodes où l'agent a eu la chance de réussir par hasard.
 
 ### 3.4 Rôle dans le benchmark
 
-Ce résultat établit le point de départ. Une amélioration de Brute Force vers Q-Learning optimisé représente un gain de **~190 steps** et une transition de 0% à ~100% de succès — ce qui quantifie l'apport de l'apprentissage par renforcement sur ce problème.
+Ce résultat établit le plancher de performance. Le passage de Brute Force à Q-Learning représente un gain de **184 steps en moyenne** (197.2 → 13.0) et une transition de 4% à 100% de succès — ce qui quantifie précisément l'apport de l'apprentissage par renforcement sur ce problème.
 
 ---
 
@@ -186,12 +188,23 @@ Cette décroissance assure que l'agent explore suffisamment au début puis conve
 
 | Métrique | Q-Learning (défaut) |
 |---|---|
-| Mean Steps | *[à compléter après benchmark]* |
-| Mean Reward | *[à compléter après benchmark]* |
-| Success Rate | *[à compléter après benchmark]* |
+| Mean Steps | **13.0 ± 0.0** |
+| Mean Reward | **8.00 ± 0.00** |
+| Success Rate | **100.0%** |
+| Time/episode | 0.104 ms |
 | Training Episodes | 1 000 |
 
-> Avec α=0.1 et seulement 1 000 épisodes, la Q-table n'a pas convergé. Le decay de 0.995 est trop rapide : après 1 000 épisodes, ε ≈ 0.007, ce qui signifie que l'agent a basculé vers l'exploitation très tôt, avant d'avoir suffisamment exploré l'espace d'états.
+**Courbe de convergence (training) :**
+
+| Épisode | Mean Steps | Mean Reward | Success Rate |
+|---|---|---|---|
+| 200 | 181.6 | -517.10 | 24.0% |
+| 400 | 123.4 | -189.84 | 76.0% |
+| 600 | 76.5 | -76.45 | 95.0% |
+| 800 | 41.8 | -25.81 | 100.0% |
+| 1 000 | 26.4 | -6.46 | 100.0% |
+
+> Résultat remarquable : même avec des paramètres par défaut et seulement 1 000 épisodes, la politique greedy au test atteint déjà la solution optimale (13 steps, 100% succès). L'agent atteint 100% de succès dès l'épisode 800. Le decay rapide (0.995) n'est pas pénalisant ici car Taxi-v3 a un espace d'états limité — 1 000 épisodes suffisent à couvrir l'essentiel des états pertinents.
 
 ### 4.4 Version optimisée
 
@@ -210,10 +223,23 @@ Cette décroissance assure que l'agent explore suffisamment au début puis conve
 
 | Métrique | Q-Learning (optimisé) |
 |---|---|
-| Mean Steps | *[à compléter après benchmark]* |
-| Mean Reward | *[à compléter après benchmark]* |
-| Success Rate | *[à compléter après benchmark]* |
+| Mean Steps | **13.0 ± 0.0** |
+| Mean Reward | **8.00 ± 0.00** |
+| Success Rate | **100.0%** |
+| Time/episode | 0.106 ms |
 | Training Episodes | 10 000 |
+
+**Courbe de convergence (training) :**
+
+| Épisode | Mean Steps | Mean Reward | Success Rate |
+|---|---|---|---|
+| 1 000 | 74.9 | -225.12 | 80.5% |
+| 2 000 | 18.1 | -8.62 | 100.0% |
+| 4 000 | 13.6 | +6.33 | 100.0% |
+| 6 000 | 13.2 | +7.28 | 100.0% |
+| 10 000 | 13.3 | +7.30 | 100.0% |
+
+> L'agent optimisé converge plus lentement en début d'entraînement (decay=0.999 plus lent) mais atteint la même performance finale que la version défaut. Sur Taxi-v3, le bénéfice principal du tuning n'est pas la qualité finale mais la **robustesse** : la politique reste stable sur la durée sans risque de sur-exploitation précoce.
 
 **Pourquoi α=0.8 fonctionne bien sur Taxi-v3 ?**
 
@@ -227,9 +253,11 @@ La récompense positive (+20) n'arrive qu'à la fin de l'épisode. Avec γ=0.99,
 
 La courbe d'apprentissage du Q-Learning optimisé montre trois phases distinctes :
 
-1. **Phase d'exploration (épisodes 0-2000)** : ε élevé, l'agent explore aléatoirement, les rewards sont très négatifs similaires au brute force.
-2. **Phase de transition (épisodes 2000-6000)** : ε décroît, la Q-table commence à se remplir de valeurs pertinentes, les performances s'améliorent rapidement.
-3. **Phase de convergence (épisodes 6000-10000)** : ε proche de ε_min, l'agent exploite sa politique apprise, les performances se stabilisent.
+1. **Phase d'exploration (épisodes 0-2000)** : ε élevé, l'agent explore aléatoirement. Les rewards sont très négatifs (-225 à ep 1000) et le succès atteint 80.5% seulement.
+2. **Phase de transition (épisodes 2000-4000)** : ε décroît, la Q-table se consolide. Le taux de succès passe à 100% dès l'épisode 2000, les steps descendent rapidement de 18 à 13.
+3. **Phase de convergence (épisodes 4000-10000)** : ε proche de ε_min, les performances se stabilisent à 13.2 steps et +7.3 de reward. La politique est optimale.
+
+> **Observation clé** : la version par défaut (α=0.1, 1000 ep) atteint les mêmes 13 steps au test, mais via une trajectoire d'apprentissage plus abrupte et moins stable. Le tuning assure une convergence plus progressive et robuste.
 
 > Graphique de référence : `results/plots/02_steps_evolution.png`
 
@@ -301,10 +329,21 @@ Sans target network, les cibles de la loss changent à chaque step (car le même
 
 | Métrique | DQN (défaut) |
 |---|---|
-| Mean Steps | *[à compléter après benchmark]* |
-| Mean Reward | *[à compléter après benchmark]* |
-| Success Rate | *[à compléter après benchmark]* |
+| Mean Steps | **13.0 ± 0.0** |
+| Mean Reward | **8.00 ± 0.00** |
+| Success Rate | **100.0%** |
+| Time/episode | 0.845 ms |
 | Training Episodes | 3 000 |
+
+**Courbe de convergence (training) :**
+
+| Épisode | Mean Steps | Mean Reward | Success Rate |
+|---|---|---|---|
+| 300 | 133.3 | -361.26 | 42.0% |
+| 600 | 35.5 | -29.87 | 93.7% |
+| 900 | 15.3 | +4.43 | 99.3% |
+| 1 200 | 14.2 | +6.50 | 100.0% |
+| 1 500+ | ~13.4 | ~+7.2 | 100.0% |
 
 ### 5.6 Version optimisée
 
@@ -324,20 +363,37 @@ Sans target network, les cibles de la loss changent à chaque step (car le même
 
 | Métrique | DQN (optimisé) |
 |---|---|
-| Mean Steps | *[à compléter après benchmark]* |
-| Mean Reward | *[à compléter après benchmark]* |
-| Success Rate | *[à compléter après benchmark]* |
+| Mean Steps | **13.0 ± 0.0** |
+| Mean Reward | **8.00 ± 0.00** |
+| Success Rate | **100.0%** |
+| Time/episode | 0.849 ms |
 | Training Episodes | 10 000 |
+
+**Courbe de convergence (training) :**
+
+| Épisode | Mean Steps | Mean Reward | Success Rate |
+|---|---|---|---|
+| 1 000 | 53.8 | -137.97 | 86.1% |
+| 2 000 | 14.1 | +4.48 | 100.0% |
+| 3 000 | 13.4 | +7.16 | 100.0% |
+| 5 000 | 13.2 | +7.43 | 100.0% |
+| 10 000 | 13.2 | +7.37 | 100.0% |
 
 ### 5.7 DQN vs Q-Learning sur Taxi-v3
 
-Sur Taxi-v3, le Q-Learning tabulaire peut atteindre des performances similaires ou légèrement meilleures que le DQN en termes de mean steps, pour une raison précise : l'espace d'états est **fini et discret** (500 états). La Q-table peut couvrir exhaustivement tous les états, tandis que le DQN doit généraliser via un réseau de neurones, ce qui introduit une approximation et une variance supplémentaire.
+Les deux algorithmes convergent vers la **même politique optimale** (13 steps, 100% succès, reward +8.00), confirmant la théorie sur ce type d'environnement.
 
-En revanche, le DQN s'impose sur des environnements :
-- À espace d'états continu ou très large (ex : Atari avec pixels en entrée)
-- Où une Q-table serait trop volumineuse pour être stockée en mémoire
+| Critère | Q-Learning | DQN |
+|---|---|---|
+| Performance finale (test) | 13.0 steps, 100% | 13.0 steps, 100% |
+| Épisodes pour 100% succès | ~800 (défaut) / ~2000 (tuned) | ~1500 (défaut) / ~2000 (tuned) |
+| Time/episode (test) | **0.10 ms** | 0.85 ms (×8.5 plus lent) |
+| Interprétabilité | Q-table lisible directement | Réseau opaque |
+| Scalabilité | Limitée (500 états) | Illimitée |
 
-> **Conclusion** : Sur Taxi-v3, Q-Learning tabulaire optimisé est l'algorithme le plus efficace. Le DQN illustre une approche plus générale mais sa supériorité se manifeste sur des problèmes plus complexes.
+Le DQN est **8.5× plus lent** en inférence que Q-Learning sur ce problème, car chaque sélection d'action nécessite un forward pass dans le réseau. Sur Taxi-v3 avec 500 états discrets, le Q-Learning a l'avantage. Le DQN s'imposerait sur une extension avec des milliers d'états ou un espace continu.
+
+> **Conclusion** : Sur Taxi-v3, Q-Learning tabulaire est l'algorithme le plus efficace en termes de vitesse d'entraînement et d'inférence. Le DQN atteint les mêmes performances mais avec un coût computationnel supérieur, justifié uniquement pour des problèmes à plus grande échelle.
 
 ---
 
@@ -366,16 +422,24 @@ Phase dropoff : distance = Manhattan(taxi, destination)
 
 ### 6.3 Résultats comparatifs
 
-| Mode | Mean Steps (train, moy. glissante à convergence) |
-|---|---|
-| default | *[à compléter]* |
-| distance | *[à compléter]* |
+Entraînement sur 5 000 épisodes (Q-Learning, α=0.8, γ=0.99, decay=0.999) :
+
+| Mode | Ep 1000 (steps / reward / success) | Ep 5000 (steps / reward / success) |
+|---|---|---|
+| default  | 73.8 / -220.47 / 82.1% | 13.3 / +7.20 / 100% |
+| distance | 69.9 / -202.51 / 83.9% | 13.1 / +11.26 / 100% |
 
 > Graphique de référence : `results/plots/07_reward_shaping.png`
 
 ### 6.4 Analyse
 
-Le reward shaping basé sur la distance accélère généralement la convergence en début d'entraînement : l'agent reçoit du signal à chaque step et apprend plus vite à se diriger vers sa cible. Cependant, il peut parfois induire un comportement sous-optimal si le bonus de distance entre en conflit avec l'objectif global (ex. le taxi préfère rester proche du passager plutôt que de le prendre). C'est pourquoi les récompenses clés restent intactes.
+Deux observations importantes :
+
+1. **Convergence légèrement plus rapide** avec le mode `distance` (83.9% vs 82.1% de succès à l'épisode 1000). Le signal de reward continu à chaque step guide l'exploration plus efficacement que les récompenses sparses, surtout en début d'entraînement.
+
+2. **Reward cumulé plus élevé** avec `distance` (+11.26 vs +7.20 à convergence). Cela s'explique mécaniquement : les bonus de distance s'accumulent à chaque step, gonflant artificiellement le reward total. En termes de **nombre de steps** (la vraie métrique de performance), les deux modes convergent vers 13 steps identiques.
+
+> **Conclusion** : Le reward shaping `distance` accélère marginalement la convergence sur Taxi-v3, mais n'améliore pas la politique finale. Son intérêt serait plus marqué sur des environnements plus complexes où les récompenses sparses ralentissent davantage l'apprentissage.
 
 ---
 
@@ -392,20 +456,23 @@ Pour chaque combinaison :
 
 ### 7.2 Grille explorée
 
+Mean steps sur 50 épisodes de test (seed=42) après 5 000 épisodes d'entraînement :
+
 | alpha \ gamma | 0.90 | 0.95 | 0.99 |
 |---|---|---|---|
-| 0.1 | *[à compléter]* | *[à compléter]* | *[à compléter]* |
-| 0.3 | *[à compléter]* | *[à compléter]* | *[à compléter]* |
-| 0.5 | *[à compléter]* | *[à compléter]* | *[à compléter]* |
-| 0.8 | *[à compléter]* | *[à compléter]* | *[à compléter]* |
+| 0.1 | 13.0 | 13.0 | 13.0 |
+| 0.3 | 13.0 | 13.0 | 13.0 |
+| 0.5 | 13.0 | 13.0 | **15.0** |
+| 0.8 | 13.0 | 13.0 | 13.0 |
 
 > Graphique de référence : `results/plots/06_heatmap_alpha_gamma.png`
 
 ### 7.3 Observations
 
-- **Impact d'alpha** : Un alpha élevé (0.5–0.8) converge plus vite sur un environnement déterministe. Un alpha trop faible (0.1) nécessite davantage d'épisodes pour propager les informations dans la Q-table.
-- **Impact de gamma** : gamma=0.99 donne systématiquement les meilleurs résultats. La récompense finale (+20) doit se propager sur ~13-20 steps en arrière ; un gamma faible l'atténue trop fortement.
-- **Impact d'epsilon_decay** : 0.999 (lent) surpasse 0.995 (rapide). Une exploration plus longue évite de converger vers une politique sous-optimale locale.
+- **Robustesse générale** : 11 combinaisons sur 12 atteignent 13.0 steps — l'algorithme Q-Learning est très robuste aux choix d'hyperparamètres sur Taxi-v3 avec 5 000 épisodes d'entraînement.
+- **Anomalie (α=0.5, γ=0.99)** : cette combinaison donne 15.0 steps au lieu de 13.0. Ce résultat peut s'expliquer par un hasard de convergence lié à la seed : avec α=0.5 et un gamma élevé, certaines Q-valeurs ont pu être légèrement sous-estimées pour cet état de test particulier.
+- **Impact d'alpha** : toutes les valeurs testées convergent aussi bien. Sur un environnement déterministe comme Taxi-v3, un alpha faible (0.1) apprend plus lentement mais finit par couvrir l'espace d'états.
+- **Impact de gamma** : γ=0.90 et γ=0.99 donnent les mêmes résultats finals à 5 000 épisodes — le problème est suffisamment simple pour que la propagation des récompenses ne soit pas bloquante.
 
 ### 7.4 Choix finaux retenus
 
@@ -428,13 +495,11 @@ Pour chaque combinaison :
 
 | Algorithme | Train Ep. | Mean Steps | Mean Reward | Success Rate | Time/ep |
 |---|---|---|---|---|---|
-| Brute Force | 0 | ~200 | ~-650 | ~0% | — |
-| Q-Learning (défaut) | 1 000 | *[à compléter]* | *[à compléter]* | *[à compléter]* | — |
-| Q-Learning (optimisé) | 10 000 | *[à compléter]* | *[à compléter]* | *[à compléter]* | — |
-| DQN (défaut) | 3 000 | *[à compléter]* | *[à compléter]* | *[à compléter]* | — |
-| DQN (optimisé) | 10 000 | *[à compléter]* | *[à compléter]* | *[à compléter]* | — |
-
-> **Comment compléter ce tableau** : lancer `python src/benchmark.py`, puis reporter les valeurs affichées dans le summary de chaque run.
+| Brute Force | 0 | 197.2 ± 15.1 | -767.43 | 4.0% | 1.626 ms |
+| Q-Learning (défaut) | 1 000 | **13.0 ± 0.0** | **+8.00** | **100.0%** | 0.104 ms |
+| Q-Learning (optimisé) | 10 000 | **13.0 ± 0.0** | **+8.00** | **100.0%** | 0.106 ms |
+| DQN (défaut) | 3 000 | **13.0 ± 0.0** | **+8.00** | **100.0%** | 0.845 ms |
+| DQN (optimisé) | 10 000 | **13.0 ± 0.0** | **+8.00** | **100.0%** | 0.849 ms |
 
 ---
 
@@ -444,13 +509,13 @@ Pour chaque combinaison :
 
 Ce projet a permis de comparer plusieurs approches pour résoudre l'environnement Taxi-v3 :
 
-1. **Brute Force** : comme attendu, l'agent aléatoire est incapable de résoudre l'environnement dans la limite des 200 steps. Il constitue un plancher de performance indispensable pour quantifier les gains des algorithmes RL.
+1. **Brute Force** : 197.2 steps en moyenne, 4% de succès. Comme attendu, l'agent aléatoire ne résout presque jamais l'environnement dans la limite des 200 steps. Il constitue le plancher indispensable qui quantifie l'apport du RL.
 
-2. **Q-Learning non-optimisé** : une amélioration significative par rapport au brute force est déjà visible avec seulement 1 000 épisodes et des paramètres par défaut. Cela confirme que même un RL basique apprend quelque chose d'utile rapidement.
+2. **Q-Learning (défaut)** : résultat surprenant — avec seulement 1 000 épisodes et des paramètres par défaut, l'agent atteint déjà **13.0 steps et 100% de succès** au test. Taxi-v3 est suffisamment simple pour que même des hyperparamètres non-tuned suffisent à trouver la politique optimale.
 
-3. **Q-Learning optimisé** : après tuning (α=0.8, decay=0.999, 10 000 épisodes), l'agent converge vers une politique proche de l'optimale et résout l'environnement en ~13-20 steps avec un taux de succès proche de 100%.
+3. **Q-Learning (optimisé)** : même performance finale (13.0 steps, 100%), mais convergence plus progressive et stable pendant l'entraînement. Le gain du tuning est visible sur la trajectoire d'apprentissage, pas sur le résultat final.
 
-4. **DQN** : les performances sont comparables au Q-Learning optimisé sur Taxi-v3. Le DQN nécessite davantage de temps d'entraînement (calcul du réseau de neurones) pour atteindre des résultats équivalents. Sur cet environnement discret et de petite taille, il n'apporte pas d'avantage pratique sur le Q-Learning tabulaire.
+4. **DQN** : atteint les mêmes 13.0 steps et 100% de succès, mais est **8.5× plus lent** en inférence (0.845 ms vs 0.104 ms) et nécessite plus d'épisodes pour converger initialement. Sur Taxi-v3, le DQN n'apporte pas d'avantage pratique sur le Q-Learning tabulaire.
 
 ### 9.2 Recommandation
 

@@ -619,6 +619,3 @@ S'assurer que les fichiers suivants sont exclus du dépôt :
 12. Rapport (Phase 11) — rédaction du document final
 13. Finalisation et livraison (Phase 13) — nettoyage et push
 
----
-
-*Document généré le 23/02/2026 — T-AIA-902 Taxi Driver*

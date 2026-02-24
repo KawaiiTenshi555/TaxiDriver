@@ -106,9 +106,10 @@ class DQNAgent:
         self.rng = np.random.default_rng(seed)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # Réseaux
-        self.q_net = QNetwork(env.n_states, env.n_actions, hidden_1, hidden_2).to(self.device)
-        self.target_net = QNetwork(env.n_states, env.n_actions, hidden_1, hidden_2).to(self.device)
+        # Réseaux (utilise n_state_features pour supporter env custom)
+        n_feats = env.n_state_features
+        self.q_net = QNetwork(n_feats, env.n_actions, hidden_1, hidden_2).to(self.device)
+        self.target_net = QNetwork(n_feats, env.n_actions, hidden_1, hidden_2).to(self.device)
         self._sync_target()
 
         # Optimiseur et loss
@@ -187,8 +188,9 @@ class DQNAgent:
             self.batch_size, self.rng
         )
 
-        # Conversion en tenseurs one-hot
-        states_t      = torch.zeros((self.batch_size, self.env.n_states),
+        # Conversion en tenseurs de features (one-hot ou compact selon l'env)
+        n_feats = self.env.n_state_features
+        states_t      = torch.zeros((self.batch_size, n_feats),
                                     dtype=torch.float32, device=self.device)
         next_states_t = torch.zeros_like(states_t)
         for i, (s, ns) in enumerate(zip(states, next_states)):

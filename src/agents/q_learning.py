@@ -51,8 +51,14 @@ class QLearningAgent:
         self.epsilon_min = epsilon_min
         self.rng = np.random.default_rng(seed)
 
-        # Q-table initialisée à zéro : shape (500, 6)
-        self.q_table = np.zeros((env.n_states, env.n_actions), dtype=np.float64)
+        # Q-table : numpy array si l'espace est gérable, dict sinon (env custom large)
+        if env.n_states <= 100_000:
+            self.q_table = np.zeros((env.n_states, env.n_actions), dtype=np.float64)
+            self._q_is_dict = False
+        else:
+            from collections import defaultdict
+            self.q_table = defaultdict(lambda: np.zeros(env.n_actions, dtype=np.float64))
+            self._q_is_dict = True
 
         # Historique de ε pour la visualisation
         self.epsilon_history: list[float] = []

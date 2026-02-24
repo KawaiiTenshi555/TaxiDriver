@@ -30,10 +30,10 @@ class BruteForceAgent:
     # Sélection d'action
     # ------------------------------------------------------------------
 
-    def select_action(self, state=None):
+    def select_action(self, state=None, training=False):
         """
         Retourne une action aléatoire uniforme parmi les 6 actions.
-        Le paramètre state est accepté mais ignoré (pas d'apprentissage).
+        Les paramètres state et training sont acceptés mais ignorés.
         """
         return int(self.rng.integers(0, self.env.n_actions))
 

@@ -309,4 +309,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if "--cli" in sys.argv:
+        main()
+    else:
+        from gui import TaxiDriverGUI
+        TaxiDriverGUI().run()

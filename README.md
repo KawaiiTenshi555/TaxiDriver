@@ -4,6 +4,11 @@ Reinforcement Learning project solving the `Taxi-v3` environment from Gymnasium.
 
 An agent (taxi) learns to pick up a passenger at a random location and drop them off at the correct destination in a minimum number of steps.
 
+## Documentation
+
+- Markdown docs: `Docs/README.md`
+- HTML docs: `Docs/index.html`
+
 ## Algorithms
 
 | Algorithm | Type | Role |

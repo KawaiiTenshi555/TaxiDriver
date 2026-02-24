@@ -12,6 +12,7 @@ from tqdm import tqdm
 from environment.taxi_wrapper import TaxiWrapper
 from utils.metrics import MetricsTracker
 from utils.replay_buffer import ReplayBuffer
+from utils.replay import run_console_replay
 
 
 # ==================================================================
@@ -383,42 +384,13 @@ class DQNAgent:
     # ------------------------------------------------------------------
 
     def play_episode(self, seed: int = None) -> None:
-        """
-        Rejoue un épisode complet avec la politique greedy apprise.
-
-        Args:
-            seed (int | None): graine pour reset
-        """
-        render_env = TaxiWrapper(
-            reward_mode=self.env.reward_mode,
-            render_mode="ansi",
+        """Replay one full episode with learned greedy policy."""
+        run_console_replay(
+            env=self.env,
+            policy=lambda state: self.select_action(state, training=False),
+            title="DQN (greedy)",
+            seed=seed,
         )
-        state, _ = render_env.reset(seed=seed)
-        total_reward = 0.0
-        step = 0
-        terminated = False
-        truncated = False
-
-        action_names = ["Sud", "Nord", "Est", "Ouest", "Pickup", "Dropoff"]
-
-        print("\n" + "─" * 40)
-        print("  REPLAY — DQN (greedy)")
-        print("─" * 40)
-
-        while not (terminated or truncated):
-            print(render_env.render())
-            action = self.select_action(state, training=False)
-            state, reward, terminated, truncated, _ = render_env.step(action)
-            total_reward += reward
-            step += 1
-            print(f"  Step {step:3d} | Action: {action_names[action]:<8} | "
-                  f"Reward: {reward:+.0f} | Cumul: {total_reward:+.0f}")
-
-        print(render_env.render())
-        result = "SUCCÈS" if terminated else "ÉCHEC (timeout)"
-        print(f"\n  Résultat : {result} en {step} steps | Reward total : {total_reward:+.0f}")
-        print("─" * 40)
-        render_env.close()
 
     # ------------------------------------------------------------------
     # Représentation

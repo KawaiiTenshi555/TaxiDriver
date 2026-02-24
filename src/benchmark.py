@@ -8,6 +8,7 @@ from environment.taxi_wrapper import TaxiWrapper
 from agents.brute_force import BruteForceAgent
 from agents.q_learning import QLearningAgent
 from agents.dqn import DQNAgent
+from config import N_TEST_EPISODES, TEST_SEED
 from utils.visualization import (
     plot_learning_curves,
     plot_steps_evolution,
@@ -18,9 +19,6 @@ from utils.visualization import (
     plot_reward_shaping_comparison,
 )
 
-# Seed commune pour tous les runs de test → comparaison équitable
-TEST_SEED    = 42
-N_TEST       = 100
 MODELS_DIR   = os.path.join(os.path.dirname(__file__), "..", "results", "models")
 
 # ==================================================================
@@ -42,7 +40,7 @@ def run_brute_force():
     print("="*55)
     env   = TaxiWrapper(reward_mode="default")
     agent = BruteForceAgent(env, seed=0)
-    tracker = agent.test(n_episodes=N_TEST, log_interval=50, seed=TEST_SEED)
+    tracker = agent.test(n_episodes=N_TEST_EPISODES, log_interval=50, seed=TEST_SEED)
     test_trackers["BruteForce"] = tracker
     env.close()
 
@@ -65,7 +63,7 @@ def run_ql_default():
     print(agent)
 
     train = agent.train(n_episodes=1000, log_interval=200)
-    test  = agent.test(n_episodes=N_TEST, log_interval=50, seed=TEST_SEED)
+    test  = agent.test(n_episodes=N_TEST_EPISODES, log_interval=50, seed=TEST_SEED)
     agent.save(os.path.join(MODELS_DIR, "ql_default.pkl"))
 
     train_trackers["Q-Learning (default)"]    = train
@@ -92,7 +90,7 @@ def run_ql_tuned():
     print(agent)
 
     train = agent.train(n_episodes=10_000, log_interval=1000)
-    test  = agent.test(n_episodes=N_TEST, log_interval=50, seed=TEST_SEED)
+    test  = agent.test(n_episodes=N_TEST_EPISODES, log_interval=50, seed=TEST_SEED)
     agent.save(os.path.join(MODELS_DIR, "ql_tuned.pkl"))
 
     train_trackers["Q-Learning (tuned)"]    = train
@@ -120,7 +118,7 @@ def run_dqn_default():
     print(agent)
 
     train = agent.train(n_episodes=3000, log_interval=300)
-    test  = agent.test(n_episodes=N_TEST, log_interval=50, seed=TEST_SEED)
+    test  = agent.test(n_episodes=N_TEST_EPISODES, log_interval=50, seed=TEST_SEED)
     agent.save(os.path.join(MODELS_DIR, "dqn_default.pt"))
 
     train_trackers["DQN (default)"]    = train
@@ -148,7 +146,7 @@ def run_dqn_tuned():
     print(agent)
 
     train = agent.train(n_episodes=10_000, log_interval=1000)
-    test  = agent.test(n_episodes=N_TEST, log_interval=50, seed=TEST_SEED)
+    test  = agent.test(n_episodes=N_TEST_EPISODES, log_interval=50, seed=TEST_SEED)
     agent.save(os.path.join(MODELS_DIR, "dqn_tuned.pt"))
 
     train_trackers["DQN (tuned)"]    = train
@@ -249,7 +247,7 @@ def generate_final_plots():
 def main():
     print("\n" + "="*55)
     print("  TAXI DRIVER — BENCHMARK COMPLET")
-    print(f"  Test : {N_TEST} épisodes | seed={TEST_SEED}")
+    print(f"  Test : {N_TEST_EPISODES} épisodes | seed={TEST_SEED}")
     print("="*55)
 
     run_brute_force()

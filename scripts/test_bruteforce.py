@@ -2,7 +2,9 @@
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(ROOT_DIR, "src"))
 
 from environment.taxi_wrapper import TaxiWrapper
 from agents.brute_force import BruteForceAgent

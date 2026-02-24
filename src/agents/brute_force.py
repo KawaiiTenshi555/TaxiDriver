@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from environment.taxi_wrapper import TaxiWrapper
 from utils.metrics import MetricsTracker
+from utils.replay import run_console_replay
 
 
 class BruteForceAgent:
@@ -101,40 +102,10 @@ class BruteForceAgent:
     # ------------------------------------------------------------------
 
     def play_episode(self, seed=None):
-        """
-        Joue un épisode complet en affichant chaque étape dans la console.
-        Utilisé pour le replay aléatoire demandé par le sujet.
-
-        Args:
-            seed (int | None): graine pour reset de l'environnement
-        """
-        render_env = TaxiWrapper(
-            reward_mode=self.env.reward_mode,
-            render_mode="ansi",
+        """Replay one full episode with random policy."""
+        run_console_replay(
+            env=self.env,
+            policy=lambda state: self.select_action(state),
+            title="Brute Force",
+            seed=seed,
         )
-        state, _ = render_env.reset(seed=seed)
-        total_reward = 0.0
-        step = 0
-        terminated = False
-        truncated = False
-
-        action_names = ["Sud", "Nord", "Est", "Ouest", "Pickup", "Dropoff"]
-
-        print("\n" + "─" * 40)
-        print("  REPLAY — Brute Force")
-        print("─" * 40)
-
-        while not (terminated or truncated):
-            print(render_env.render())
-            action = self.select_action(state)
-            state, reward, terminated, truncated, _ = render_env.step(action)
-            total_reward += reward
-            step += 1
-            print(f"  Step {step:3d} | Action: {action_names[action]:<8} | "
-                  f"Reward: {reward:+.0f} | Cumul: {total_reward:+.0f}")
-
-        print(render_env.render())
-        result = "SUCCÈS" if terminated else "ÉCHEC (timeout)"
-        print(f"\n  Résultat : {result} en {step} steps | Reward total : {total_reward:+.0f}")
-        print("─" * 40)
-        render_env.close()

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TaxiDriver - Documentation</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #18212f;
+      --muted: #526070;
+      --line: #d8dee6;
+      --accent: #1f6feb;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+    }
+    main {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 20px rgba(15, 30, 60, 0.05);
+    }
+    h1, h2 { margin: 0 0 12px; }
+    p, li { color: var(--muted); }
+    code {
+      background: #eef3ff;
+      color: #123a72;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.95em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    th, td {
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      padding: 8px 6px;
+    }
+    th { color: var(--text); }
+    .diagram-title {
+      margin-bottom: 8px;
+      color: var(--text);
+      font-weight: 600;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fcfdff;
+    }
+    .node {
+      fill: #e8f1ff;
+      stroke: #2b5fb8;
+      stroke-width: 1.3;
+    }
+    .node-alt {
+      fill: #e9f8ee;
+      stroke: #1f8d4e;
+      stroke-width: 1.3;
+    }
+    .label {
+      font-size: 13px;
+      fill: #17325f;
+      font-weight: 600;
+    }
+    .arrow {
+      stroke: #4b617e;
+      stroke-width: 1.2;
+      marker-end: url(#arrowhead);
+    }
+    .foot {
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <h1>TaxiDriver - Documentation HTML</h1>
+      <p>
+        Ce document explique le fonctionnement du projet de reinforcement learning
+        sur <code>Taxi-v3</code>, avec une vue architecture et des schemas de flux.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Composants principaux</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>src/environment/taxi_wrapper.py</code></td><td>Interface Gymnasium + reward shaping.</td></tr>
+          <tr><td><code>src/agents/brute_force.py</code></td><td>Baseline aleatoire.</td></tr>
+          <tr><td><code>src/agents/q_learning.py</code></td><td>Agent tabulaire Q-Learning.</td></tr>
+          <tr><td><code>src/agents/dqn.py</code></td><td>Agent DQN (reseau + replay + target net).</td></tr>
+          <tr><td><code>src/utils/metrics.py</code></td><td>Collecte et agregation des metriques.</td></tr>
+          <tr><td><code>src/utils/visualization.py</code></td><td>Generation des graphiques.</td></tr>
+          <tr><td><code>src/config.py</code></td><td>Constantes partagees (seed, episodes, params optimises).</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Schema architecture</h2>
+      <div class="diagram-title">Orchestration globale</div>
+      <svg viewBox="0 0 920 300" role="img" aria-label="Schema architecture TaxiDriver">
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <polygon points="0 0, 8 4, 0 8" fill="#4b617e"></polygon>
+          </marker>
+        </defs>
+        <rect class="node" x="20" y="110" width="160" height="52" rx="8"></rect>
+        <text class="label" x="100" y="140" text-anchor="middle">main.py / benchmark.py</text>
+
+        <rect class="node-alt" x="250" y="40" width="160" height="52" rx="8"></rect>
+        <text class="label" x="330" y="70" text-anchor="middle">TaxiWrapper</text>
+
+        <rect class="node" x="250" y="120" width="160" height="52" rx="8"></rect>
+        <text class="label" x="330" y="150" text-anchor="middle">Agents (BF / QL / DQN)</text>
+
+        <rect class="node-alt" x="250" y="200" width="160" height="52" rx="8"></rect>
+        <text class="label" x="330" y="230" text-anchor="middle">MetricsTracker</text>
+
+        <rect class="node" x="500" y="80" width="160" height="52" rx="8"></rect>
+        <text class="label" x="580" y="110" text-anchor="middle">ReplayBuffer (DQN)</text>
+
+        <rect class="node-alt" x="500" y="170" width="160" height="52" rx="8"></rect>
+        <text class="label" x="580" y="200" text-anchor="middle">visualization.py</text>
+
+        <rect class="node" x="740" y="80" width="160" height="52" rx="8"></rect>
+        <text class="label" x="820" y="110" text-anchor="middle">results/models</text>
+
+        <rect class="node" x="740" y="170" width="160" height="52" rx="8"></rect>
+        <text class="label" x="820" y="200" text-anchor="middle">results/plots</text>
+
+        <line class="arrow" x1="180" y1="136" x2="250" y2="66"></line>
+        <line class="arrow" x1="180" y1="136" x2="250" y2="146"></line>
+        <line class="arrow" x1="180" y1="136" x2="250" y2="226"></line>
+        <line class="arrow" x1="410" y1="146" x2="500" y2="106"></line>
+        <line class="arrow" x1="410" y1="226" x2="500" y2="196"></line>
+        <line class="arrow" x1="660" y1="106" x2="740" y2="106"></line>
+        <line class="arrow" x1="660" y1="196" x2="740" y2="196"></line>
+      </svg>
+    </section>
+
+    <section class="card">
+      <h2>Schema boucle d'entrainement</h2>
+      <div class="diagram-title">Cycle episode -> step -> update</div>
+      <svg viewBox="0 0 920 220" role="img" aria-label="Schema boucle entrainement">
+        <defs>
+          <marker id="arrowhead2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <polygon points="0 0, 8 4, 0 8" fill="#4b617e"></polygon>
+          </marker>
+        </defs>
+        <rect class="node" x="20" y="84" width="130" height="52" rx="8"></rect>
+        <text class="label" x="85" y="114" text-anchor="middle">reset()</text>
+
+        <rect class="node-alt" x="190" y="84" width="170" height="52" rx="8"></rect>
+        <text class="label" x="275" y="114" text-anchor="middle">select_action()</text>
+
+        <rect class="node" x="400" y="84" width="150" height="52" rx="8"></rect>
+        <text class="label" x="475" y="114" text-anchor="middle">env.step()</text>
+
+        <rect class="node-alt" x="590" y="84" width="170" height="52" rx="8"></rect>
+        <text class="label" x="675" y="114" text-anchor="middle">update / learn</text>
+
+        <rect class="node" x="800" y="84" width="100" height="52" rx="8"></rect>
+        <text class="label" x="850" y="114" text-anchor="middle">done?</text>
+
+        <line class="arrow" style="marker-end:url(#arrowhead2)" x1="150" y1="110" x2="190" y2="110"></line>
+        <line class="arrow" style="marker-end:url(#arrowhead2)" x1="360" y1="110" x2="400" y2="110"></line>
+        <line class="arrow" style="marker-end:url(#arrowhead2)" x1="550" y1="110" x2="590" y2="110"></line>
+        <line class="arrow" style="marker-end:url(#arrowhead2)" x1="760" y1="110" x2="800" y2="110"></line>
+        <line class="arrow" style="marker-end:url(#arrowhead2)" x1="850" y1="136" x2="850" y2="190"></line>
+        <line class="arrow" style="marker-end:url(#arrowhead2)" x1="850" y1="190" x2="275" y2="190"></line>
+        <line class="arrow" style="marker-end:url(#arrowhead2)" x1="275" y1="190" x2="275" y2="136"></line>
+      </svg>
+      <p class="foot">Pour DQN, une transition est aussi stockee dans le replay buffer avant l'etape <code>learn</code>.</p>
+    </section>
+  </main>
+</body>
+</html>

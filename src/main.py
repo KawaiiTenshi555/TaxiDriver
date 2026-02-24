@@ -10,6 +10,8 @@ from environment.taxi_wrapper import TaxiWrapper
 from agents.brute_force import BruteForceAgent
 from agents.q_learning import QLearningAgent
 from agents.dqn import DQNAgent
+from config import OPTIMIZED_PARAMS
+from utils.metrics import MetricsTracker
 from utils.visualization import (
     plot_learning_curves,
     plot_steps_evolution,
@@ -202,13 +204,6 @@ def run_user_mode() -> None:
 # Mode 2 — Time-Limited Mode
 # ==================================================================
 
-# Paramètres pré-optimisés (issus du benchmarking — Phase 10)
-OPTIMIZED_PARAMS = {
-    "ql": dict(alpha=0.8, gamma=0.99, epsilon=1.0, epsilon_decay=0.999, epsilon_min=0.01),
-    "dqn": dict(lr=0.001, gamma=0.99, epsilon=1.0, epsilon_decay=0.995, epsilon_min=0.01,
-                batch_size=64, target_update_freq=100),
-}
-
 
 def run_time_limited_mode() -> None:
     """
@@ -240,7 +235,6 @@ def run_time_limited_mode() -> None:
     print(f"Entraînement pendant {time_budget}s avec paramètres optimisés...")
 
     # Boucle d'entraînement bornée dans le temps
-    from utils.metrics import MetricsTracker
     tracker = MetricsTracker(n_episodes=999_999, log_interval=200, phase="Training")
     ep = 0
     deadline = time.perf_counter() + time_budget
